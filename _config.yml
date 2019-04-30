@@ -1,9 +1,4 @@
-theme: jekyll-theme-tactile
-title: 窗外蟋蟀
-SEOTitle: 窗外蟋蟀的博客 | 贵阳 Blog
+theme: jekyll-theme-architect
+title: 草莓不甜
+SEOTitle: 草莓不甜的博客 | gyfeng1003 Blog
 header-img: img/home-bg-hill.jpg
-email: keysaim@gmail.com
-description: "描述"
-keyword: "窗外蟋蟀, gyfeng1003"
-url: "https://gyfeng1003.github.io"
-baseurl: ""

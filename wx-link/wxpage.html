@@ -1,0 +1,356 @@
+
+<!DOCTYPE html>
+<html lang="zh_CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <style type="text/css">
+        *{margin:0; padding:0;}
+        a{text-decoration: none;}
+        img{max-width: 100%;}
+        html,body{
+            height: 100%;
+            width: 100%;
+            background: #0e0e0e;
+        }
+        .clearfix:after {
+            content:"";
+            display:block;
+            visibility:hidden;
+            height:0;
+            clear: both;
+        }
+        .btn-item{
+            float: left;
+            perspective: 800px;
+            position: relative;
+            width: 33.33%;
+        }
+        .btn-item img{
+            width: 100%;
+            vertical-align: middle;
+            position: absolute;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility:hidden;	/* Chrome 和 Safari */
+            -moz-backface-visibility:hidden; 	/* Firefox */
+            -ms-backface-visibility:hidden; 	/* Internet Explorer */
+            transition: 1s;
+            -webkit-transition: 1s;
+            -moz-transition: 1s;
+            -o-transition: 1s;
+        }
+        .btn-item .neg{
+            transform: rotateY(-180deg);
+            -webkit-transform:  rotateY(-180deg);
+            -o-transform:  rotateY(-180deg);
+        }
+
+        #weixin-tip{display:none; position: fixed; left:0; top:0; background: rgba(0,0,0,0.62); filter:alpha(opacity=80); width: 100%; height:100%; z-index: 100;}
+        #weixin-tip p{text-align: center; position: relative;white-space: nowrap;line-height: 1.8;}
+        #weixin-tip .dialog{
+            background: #f5f5f5;
+            position: absolute;
+            left: 50%;
+            top: 40%;
+            transform: translate(-50%, -50%);
+            -webkit-transform:translate(-50%, -50%);
+            -o-transform:translate(-50%, -50%);
+            -moz-transform:translate(-50%, -50%);
+            z-index: 101;
+            border-radius: 6px;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        #weixin-tip .close{
+            position: absolute;
+            bottom: -42px;
+            height: 24px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+        #weixin-tip #img{
+            max-width: 24px;
+        }
+        #weixin-tip .lead{
+            width: 50px;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        #weixin-tip .download{
+            margin-top: 10px;
+        }
+        #weixin-tip .download div{
+            float: left;
+            width: 48%;
+            text-align: center;
+            box-sizing: border-box;
+            background: #aa4f4f;
+            padding: 6px 0;
+            border-radius: 4px;
+            color: #f5f5f5;
+        }
+        #weixin-tip .download div:active{
+            background: #aa7577;
+        }
+    </style>
+    <title>首页</title>
+    <script src="lib/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+<div id="page-wrap" class="clearfix"></div>
+<div id="weixin-tip">
+    <!--<div class="lead"><img src="images/lead.png"></div>-->
+    <div class="dialog">
+        <p>请使用</p>
+        <p>Firefox火狐浏览器</p>
+        <p>或</p>
+        <p>Chrome谷歌浏览器</p>
+        <p>等对WebGL更友好</p>
+        <p>的浏览器打开</p>
+        <div class="download clearfix"><div  data-name="firefox">下载firefox</div><div style="float: right;" data-name="chrome">下载chrome</div></div>
+        <div class="close"><img id="img" src="images/close.png"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    var timer;
+    var browserInfo = (function() {
+		var json = {
+			userAgent: navigator.userAgent.toLowerCase(),
+			isAndroid: Boolean(navigator.userAgent.match(/android/ig)),
+			isIphone: Boolean(navigator.userAgent.match(/iphone|ipod/ig)),
+			isIpad: Boolean(navigator.userAgent.match(/ipad/ig)),
+			isWeixin: Boolean(navigator.userAgent.match(/MicroMessenger/ig)),
+            isPC: !Boolean(navigator.userAgent.match(/Android|iPhone|SymbianOS|Windows Phone|iPad|iPod/ig)),
+            isMobileFireOrChrome: Boolean(navigator.userAgent.match(/CriOS|fxios/ig)),
+            isFireOrChrome: Boolean(navigator.userAgent.match(/chrome|firefox/ig)),
+            hasEdge: Boolean(navigator.userAgent.match(/edge/ig)),
+			isIOS: !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) //ios终端
+		}
+		return json;
+	})();
+
+    function getWH() {
+        var height = window.innerHeight,width=window.innerWidth;
+        if(typeof height != 'number' || typeof width != 'number'){
+            if(document.compatMode == 'CSS1Compat'){
+                height = document.documentElement.clientHeight;
+                width = document.documentElement.clientWidth;
+            }else {
+                height = document.body.clientHeight;
+                width = document.body.clientWidth;
+            }
+        }
+        return {height: height, width: width};
+    }
+
+	function setTransform(ele, val) {
+		if(!ele)return;
+		ele.css('transform',val);
+		ele.css('WebkitTransform',val);
+		ele.css('MozTransform',val);
+		ele.css('OTransform',val);
+		ele.css('MsTransform',val);
+	}
+
+	function registerEvent() {
+		$(".btn-item").mouseenter(function () {
+			var that = $(this);
+			if($(this).children('.pos').hasClass('hide')){
+			}else{
+				$(this).children('.neg').removeClass('hide');
+				$(this).children('.pos').addClass('hide');
+				setTransform($(this).children('.pos'), 'rotateY(180deg)');
+				setTransform($(this).children('.neg'), 'rotateY(0)');
+			}
+            if(!browserInfo.isPC){
+				reset(that);
+            }
+		}).mouseleave(function(){
+			var that = $(this);
+			if(browserInfo.isPC){
+				reset(that);
+            }
+		});
+		function reset(that) {
+			timer = setTimeout(function () {
+				if(that.children('.pos').hasClass('hide')){
+					that.children('.pos').removeClass('hide');
+					that.children('.neg').addClass('hide');
+					setTransform(that.children('.pos'), 'rotateY(0)');
+					setTransform(that.children('.neg'), 'rotateY(-180deg)');
+				}
+			}, 4000);
+		}
+	}
+
+	function registerMaskEvent() {
+		if(browserInfo.isPC){
+			$(".dialog").width('400px');
+        }else {
+			$(".dialog").width(getWH().width - 120 + 'px');
+        }
+		var winHeight = getWH().height;
+		var btn = document.getElementsByClassName('btn-item');
+		var tip = document.getElementById('weixin-tip');
+		for(var i=0; i<btn.length; i++){
+			(function(k){
+				btn[k].onclick = function() {
+					tip.style.height = winHeight + 'px';
+					tip.style.display = 'block';
+					return false;
+				}
+			})(i);
+		}
+		$("#img").click(function(){
+			tip.style.display = 'none';
+		})
+        openApp()
+	}
+
+	function openApp() {
+		var u = navigator.userAgent;
+		var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1; //android终端或者uc浏览器
+		$(".download div").click(function () {
+			var name = $(this).data('name');
+			if(name == 'chrome'){
+				if(browserInfo.isPC){
+					window.location.href = "https://www.google.cn/chrome/";
+				}else{
+					if(browserInfo.isIOS){
+						window.location.href = 'https://itunes.apple.com/cn/app/chrome-由google开发的网络浏览器/id535886823?mt=8';
+					}
+					if(isAndroid){
+						window.location.href = 'http://sj.qq.com/myapp/detail.htm?apkName=com.android.chrome';
+					}
+				}
+			}else{
+				if(browserInfo.isPC){
+					window.location.href = " http://www.firefox.com.cn/";
+				}else{
+					if(browserInfo.isIOS){
+						window.location.href = 'https://itunes.apple.com/cn/app/firefox-网络浏览器/id989804926?mt=8';
+					}
+					if(isAndroid){
+						window.location.href = "http://sj.qq.com/myapp/search.htm?kw=firefox";
+					}
+				}
+			}
+		})
+	}
+
+	function setImageHeight() {
+		$(".btn-item").height((getWH().width/3)*768/1024);
+		$(window).resize(function () {
+			$(".btn-item").height((getWH().width/3)*768/1024);
+		})
+	}
+
+	function orient() {
+		if (window.orientation == 90 || window.orientation == -90) {
+            //ipad、iphone竖屏；Andriod横屏
+            // if(browserInfo.isIpad || browserInfo.isIphone){
+				// $(".btn-item").height(getWH().height/7);
+				// $(window).resize(function () {
+				// 	$(".btn-item").height(getWH().height/7);
+				// })
+            // }
+            // if(browserInfo.isAndroid){
+	            setImageHeight()
+            // }
+		}
+		else if (window.orientation == 0 || window.orientation == 180) {
+            //ipad、iphone横屏；Andriod竖屏
+            // if(browserInfo.isIpad || browserInfo.isIphone){
+				// setImageHeight()
+			// }
+			// if(browserInfo.isAndroid){
+				$(".btn-item").height(getWH().height/7);
+				$(window).resize(function () {
+					$(".btn-item").height(getWH().height/7);
+				})
+			// }
+		}
+	}
+
+	$(function(){
+		var imgs = [];
+		$.getJSON("./config/pictures.json", function (json) {
+            imgs = json || [];
+			var page = $("#page-wrap");
+			for(var i=0; i<imgs.length; i++){
+				var str = "<div class='btn-item clearfix'>" +
+					"<img class='pos' src='images/"+imgs[i].pos+"'/>" +
+					"<img class='neg hide' data-url='"+imgs[i].url+"'+ src='images/"+imgs[i].neg+"'/>";
+				page.append(str);
+			}
+			if(browserInfo.isPC){
+				setImageHeight();
+			}else{
+				orient();
+				//用户变化屏幕方向时调用
+				$(window).bind( 'orientationchange', function(e){
+					orient()
+				});
+			}
+			if(browserInfo.isWeixin){
+				registerMaskEvent();
+			}else{
+				if(browserInfo.isPC){
+					if(!browserInfo.hasEdge && browserInfo.isFireOrChrome){
+						registerEvent();
+					}else{
+						registerMaskEvent();
+					}
+				}
+				if(!browserInfo.isPC){
+					if(browserInfo.isMobileFireOrChrome){
+						registerEvent();
+					}else{
+						// registerMaskEvent();
+						registerEvent();
+					}
+				}
+			}
+
+			$(".neg").click(function () {
+                var url = $(this).data('url');
+                window.open(url);
+			})
+		})
+		// $("#page-wrap").css('background-image', 'url("./images/aa.png")');
+		// $("#page-wrap").css('background-size', '100% 100%');
+        // var imgs = [
+        //     {pos: '1_1_S_Si_PZ_BJPZ_0.png', neg: '1_1_S_Si_PZ_BJPZ.png'},
+        //     {pos: '1_2_S_Si_PZ_ZTPZ_0.png', neg: '1_2_S_Si_PZ_ZTPZ.png'},
+        //     {pos: '1_3_S_Si_PZ_ZJPZ_0.png', neg: '1_3_S_Si_PZ_ZJPZ.png'},
+        //     {pos: '2_1_S_Wu_PZ_BJPZ_0.png', neg: '2_1_S_Wu_PZ_BJPZ.png'},
+        //     {pos: '2_2_S_Wu_PZ_ZTPZ_0.png', neg: '2_2_S_Wu_PZ_ZTPZ.png'},
+        //     {pos: '2_3_S_Wu_PZ_ZJPZ_0.png', neg: '2_3_S_Wu_PZ_ZJPZ.png'},
+        //     {pos: '3_1_S_Liu_PZ_BJPZ_0.png', neg: '3_1_S_Liu_PZ_BJPZ.png'},
+        //     {pos: '3_2_S_Liu_PZ_ZTPZ_0.png', neg: '3_2_S_Liu_PZ_ZTPZ.png'},
+        //     {pos: '3_3_S_Liu_PZ_ZJPZ_0.png', neg: '3_3_S_Liu_PZ_ZJPZ.png'},
+        //     {pos: '4_1_S_Qi_PZ_BJPZ_0.png', neg: '4_1_S_Qi_PZ_BJPZ.png'},
+        //     {pos: '4_2_S_Qi_PZ_ZTPZ_0 (2).png', neg: '4_2_S_Qi_PZ_ZTPZ.png'},
+        //     {pos: '4_3_S_Qi_PZ_ZJPZ_0.png', neg: '4_3_S_Qi_PZ_ZJPZ.png'},
+        //     {pos: '5_1_S_Ba_PZ_BJPZ_0.png', neg: '5_1_S_Ba_PZ_BJPZ.png'},
+        //     {pos: '5_2_S_Ba_PZ_ZTPZ_0.png', neg: '5_2_S_Ba_PZ_ZTPZ.png'},
+        //     {pos: '5_3_S_Ba_PZ_ZJPZ_0.png', neg: '5_3_S_Ba_PZ_ZJPZ.png'},
+        //     {pos: '6_1_S_SA_PZ_Ba_PZ_0.png', neg: '6_1_S_SA_PZ_Ba_PZ.png'},
+        //     {pos: '6_2_S_SA_PZ_Qi_PZ_0.png', neg: '6_2_S_SA_PZ_Qi_PZ.png'},
+        //     {pos: '6_3_S_Wu_PZ_TXZJ_0.png', neg: '6_3_S_Wu_PZ_TXZJ.png'},
+        //     {pos: '7_1_S_SA_PZ_Liu_PZ_0.png', neg: '7_1_S_SA_PZ_Liu_PZ.png'},
+        //     {pos: '7_2_S_SA_PZ_Wu_PZ_0.png', neg: '7_2_S_SA_PZ_Wu_PZ.png'},
+        //     {pos: '7_3_S_Si_PZ_BNC_0.png', neg: '7_3_S_Si_PZ_BNC.png'}
+        // ]
+        //初始化页面按钮
+	})
+</script>
+</body>
+</html>
