@@ -1,4 +1,4 @@
-importScripts("precache-manifest.0990bef306deff65018d6b2c6d6b24de.js", "https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
+importScripts("precache-manifest.72160e846f13512e4a8129548336ac19.js", "https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 // 首先引入workbox框架
 workbox.routing.registerRoute(
